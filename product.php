@@ -1,34 +1,25 @@
-<?php require("./layout/Header.php") ?>
-<?php require("./layout/db.php") ?>
-
-<div class="container mt-3">
-    <h3 class="mt-4" style="color:#2b74e2;display:flex;flex-direction:row;justify-content:space-between">
-        <span>Product :</span>
-        <span>
-            <button type="button" style="color:#fff;background-color:#2b74e2"  class="btn" data-bs-toggle="modal" data-bs-target="#myModal">
-                Add Product
-            </button>
-        </span>
-    </h3>
-
+<?php require("./layout/db.php"); ?>
+<?php require("./layout/Header.php"); ?>
+<?php require("./layout/Navbar.php"); ?>
+<div class="pagetitle" style="color:#2b74e2;display:flex;flex-direction:row;justify-content:space-between">
+    <h1>Products</h1>
+    <button type="button" style="color:#fff;background-color:#012970"  class="btn" data-bs-toggle="modal" data-bs-target="#myModal">
+        Add Product
+    </button>
     <div class="modal fade" id="myModal">
         <div class="modal-dialog">
             <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title" style="color:#2b74e2">Add Product</h4>
+                <h4 class="modal-title" style="color:#012970">Add Product</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
             <!-- Modal body -->
             <div class="modal-body">
-                <form onsubmit="document.getElementById('loader').style.display='block'" action="/action/add.php" method="post">
+                <form onsubmit="document.getElementById('loader').style.display='block'" style="color:#012970" action="/add.php" method="post">
                     <div class="form-floating mb-3 ">
                         <input required type="text" class="form-control"  name="name" placeholder="Product Name">
                         <label>Product Name</label>
-                    </div>
-                    <div class="form-floating mb-3 mt-3">
-                        <input required type="number" class="form-control"  name="rate" placeholder="Rate">
-                        <label>Rate</label>
                     </div>
                     <div class="form-floating mb-3 mt-3">
                         <input required type="number" class="form-control"  name="stock" placeholder="Stock">
@@ -39,7 +30,7 @@
                         <label>Expiry Date</label>
                     </div>
                     <div style="display:flex;justify-content:flex-end">
-                        <button class="btn  w-25" style="background-color:#2b74e2;color:#fff">Add</button>
+                        <button class="btn  w-25" style="background-color:#012970;color:#fff">Add</button>
                     </div>
                 </form>
             </div>
@@ -47,82 +38,40 @@
             </div>
         </div>
     </div>
-
-    <br>  
-    <div class="table-responsive">        
-    <table class="table table-striped table-bordered">
-        <thead style="text-align:center">
-            <tr>
-                <th>#</th>
-                <th>Product</th>
-                <th>Rate</th>
-                <th>Stock</th>
-                <th>Expiry</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-            $result = $conn->query("SELECT * FROM product ORDER BY id DESC");
-            if($result->num_rows > 0){
-                $i=0;
-                while($row = $result->fetch_assoc()){
-                    $i++;
-                    ?>
-                        <tr>
-                            <td style="text-align:center"><?php echo($i) ?></td>
-                            <td><?php echo($row["name"]) ?></td>
-                            <td><?php echo($row["rate"]) ?></td>
-                            <td><?php echo($row["stock"]) ?></td>
-                            <td><?php echo($row["expiry"]) ?></td>
-                        </tr>
-                    <?php
-                }
-            }else{
-            ?>
-            <tr>
-                <td style="text-align:center" colspan="5">Nothing Found</td>
-            </tr>
-            <?php
-            }
-            ?>
-        </tbody>
-    </table>
-    </div>
-
-    <p style="text-align:center;line-height:3.5;font-size:16px">
-        <?php 
-        for($page = 1; $page<= $number_of_page; $page++) { 
-            if($page==$_GET['page']){
-                echo '<a style="margin:5px;padding:14px;border-radius:5px;border:2px solid #922521;background-color:#922521;font-weight:600;color:#fff;text-decoration:none" href = "?page=' . $page . '">' . $page . ' </a>';  
-            }else{
-                echo '<a style="margin:5px;padding:8px;border-radius:5px;border:1px solid #aaa;color:#444;text-decoration:none" href = "?page=' . $page . '">' . $page . ' </a>';  
-            }
-        }  
-        ?>
-    </p>
-    <br>
 </div>
+<div class="row">
+<?php
+    $date=date_create();
+    $date=date_add($date,date_interval_create_from_date_string("3 days"));
+    $date = date_format($date,"Y-m-d");
+    $userid = $_COOKIE["id"];
+    $result = $conn->query("SELECT * FROM product WHERE userid='$userid'");
+    if($result->num_rows > 0){
+        $i=0;
+        while($row = $result->fetch_assoc()){
+            $i++;
+            ?>
+            <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
+                <div class="card" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">Name : <?php echo($row["name"]) ?></h5>
+                        <h6 class="card-subtitle mb-2 text-muted">Stock : <?php echo($row["stock"]) ?></h6>
+                        <h6 class="card-subtitle mb-2 text-muted">Expiry : <?php echo($row["expiry"]) ?></h6>
+                        <form action="/delete.php" method="post" class="mt-4 text-end">
+                            <input type="hidden" name="id" value="<?php echo($row["id"]) ?>">
+                            <button class="btn btn-danger">delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <?php
+        }
+    }else{
+?>
+<p class="text-center text-secondary">Nothing Found</p>
 
-
-<script>
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
-    if(urlParams.get('err')){
-      document.write("<div id='err' style='position:fixed;bottom:30px; right:30px;background-color:#FF0000;padding:10px;border-radius:10px;box-shadow:2px 2px 4px #aaa;color:white;font-weight:600'>"+urlParams.get('err')+"</div>")
+<?php
     }
-    setTimeout(()=>{
-        document.getElementById("err").style.display="none"
-    }, 3000)
-</script>
-
-<script>
-    if(urlParams.get('msg')){
-      document.write("<div id='msg' style='position:fixed;bottom:30px; right:30px;background-color:#4CAF50;padding:10px;border-radius:10px;box-shadow:2px 2px 4px #aaa;color:white;font-weight:600'>"+urlParams.get('msg')+"</div>")
-    }
-    setTimeout(()=>{
-        document.getElementById("msg").style.display="none"
-    }, 3000)
-</script>
-
-
-<?php require("./layout/Footer.php") ?>
+?>
+</div>
+<?php require("./layout/Footer.php"); ?>

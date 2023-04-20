@@ -1,7 +1,6 @@
 <?php
-session_start();
-session_unset();
-session_destroy();
-header("Location: /admin/");
+setcookie("id", "", time() - 3600);
+setcookie("name", "", time() - 3600);
+header("Location: /");
 die();
 ?>
